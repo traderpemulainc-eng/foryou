@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forr Youu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;700&family=Crimson+Text&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 50%, #ffaebc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Playfair Display', serif;
+            overflow: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Partikel latar belakang */
+        .background-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .envelope-container {
+            position: relative;
+            perspective: 1000px;
+            z-index: 10;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 68.75%;
+            background: linear-gradient(145deg, #f0e68c, #e6d77a);
+            border: 3px solid #d4c46a;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.2),
+                0 0 0 8px rgba(255, 182, 193, 0.3),
+                inset 0 -10px 20px rgba(0,0,0,0.1);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-style: preserve-3d;
+            margin: 0 auto;
+        }
+
+        .envelope:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.3),
+                0 0 0 8px rgba(255, 182, 193, 0.4),
+                inset 0 -10px 20px rgba(0,0,0,0.1);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 50% 50% 0 50%;
+            border-color: #d4c46a transparent transparent transparent;
+            z-index: 2;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-origin: bottom;
+        }
+
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+            opacity: 0.7;
+        }
+
+        .letter {
+            position: absolute;
+            top: 4.5%;
+            left: 4.5%;
+            width: 91%;
+            height: 86%;
+            background: linear-gradient(145deg, #ffffff, #f8f8f8);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            box-sizing: border-box;
+            transform: translateY(100%) rotate(5deg);
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.1),
+                inset 0 0 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .letter.open {
+            transform: translateY(-150%) rotate(0deg) scale(1.05);
+            opacity: 1;
+        }
+
+        /* Animasi surat hilang ke kiri */
+        .letter.disappear {
+            transform: translateX(-200%) rotate(-10deg) scale(0.8);
+            opacity: 0;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Animasi kertas ke tengah */
+        .paper-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 80%;
+            max-width: 500px;
+            height: 70vh;
+            background: linear-gradient(145deg, #ffffff, #f8f8f8);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 1000;
+            padding: 30px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: all 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .paper-center.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .paper-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .paper-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0e68c;
+        }
+
+        .paper-header h2 {
+            color: #8b4513;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .paper-header .date {
+            color: #999;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .paper-body {
+            flex: 1;
+            color: #333;
+            line-height: 1.8;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .paper-body p {
+            margin-bottom: 20px;
+        }
+
+        .paper-signature {
+            text-align: right;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            color: #8b4513;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0e68c;
+        }
+
+        .letter-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 8%;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .letter-header {
+            text-align: center;
+            margin-bottom: 5%;
+            padding-bottom: 3%;
+            border-bottom: 1px solid #eee;
+        }
+
+        .letter-header h2 {
+            color: #8b4513;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.2rem, 4vw, 1.75rem);
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .letter-header .date {
+            color: #999;
+            font-size: clamp(0.7rem, 2.5vw, 0.875rem);
+            font-style: italic;
+        }
+
+        .letter-body {
+            flex: 1;
+            color: #333;
+            line-height: 1.6;
+            font-size: clamp(0.8rem, 2.8vw, 1rem);
+            text-align: justify;
+            margin: 5% 0;
+            overflow-y: auto;
+            padding: 2% 0;
+        }
+
+        .letter-body p {
+            margin-bottom: 4%;
+            text-indent: 15px;
+        }
+
+        .letter-signature {
+            text-align: right;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            color: #8b4513;
+            margin-top: 5%;
+            padding-top: 3%;
+            border-top: 1px solid #eee;
+        }
+
+        .stamp {
+            position: absolute;
+            top: 6%;
+            right: 6%;
+            width: 18.75%;
+            height: 27.27%;
+            background: radial-gradient(circle, #ff6347, #dc143c);
+            border-radius: 50%;
+            z-index: 3;
+            box-shadow: 
+                0 3px 10px rgba(0,0,0,0.3),
+                inset 0 2px 5px rgba(255,255,255,0.3);
+            animation: spin 8s linear infinite;
+            border: 2px solid #fff;
+        }
+
+        .stamp:after {
+            content: "✉";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1rem, 4vw, 1.75rem);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 13.6%;
+            right: 9.375%;
+            width: 12.5%;
+            height: 18.18%;
+            background: linear-gradient(145deg, #ffd700, #daa520);
+            border-radius: 50%;
+            z-index: 4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.8rem, 3vw, 1.25rem);
+            color: #8b4513;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8b4513;
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            font-style: italic;
+            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 0.4;
+                transform: translateX(-50%) translateY(0px);
+            }
+            50% { 
+                opacity: 1;
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .confetti {
+            position: absolute;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        /* Scrollbar styling */
+        .letter-content::-webkit-scrollbar,
+        .paper-center::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .letter-content::-webkit-scrollbar-track,
+        .paper-center::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .letter-content::-webkit-scrollbar-thumb,
+        .paper-center::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-radius: 3px;
+        }
+
+        .letter-content::-webkit-scrollbar-thumb:hover,
+        .paper-center::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+
+        /* Tablet Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .envelope-container {
+                max-width: 280px;
+            }
+            
+            .click-hint {
+                bottom: -50px;
+                font-size: 0.9rem;
+                max-width: 250px;
+            }
+            
+            .paper-center {
+                width: 90%;
+                height: 80vh;
+                padding: 20px;
+            }
+            
+            .paper-header h2 {
+                font-size: 2rem;
+            }
+            
+            .paper-body {
+                font-size: 1rem;
+            }
+            
+            .paper-signature {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+            }
+            
+            .envelope-container {
+                max-width: 250px;
+            }
+            
+            .click-hint {
+                bottom: -45px;
+                font-size: 0.8rem;
+                max-width: 220px;
+            }
+            
+            .letter-content {
+                padding: 6%;
+            }
+            
+            .letter-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .letter-body {
+                font-size: 0.85rem;
+            }
+            
+            .letter-signature {
+                font-size: 1.1rem;
+            }
+            
+            .paper-center {
+                width: 95%;
+                height: 85vh;
+                padding: 15px;
+            }
+            
+            .paper-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .paper-body {
+                font-size: 0.9rem;
+            }
+            
+            .paper-signature {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Small Mobile Styles */
+        @media (max-width: 320px) {
+            body {
+                padding: 10px;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .envelope-container {
+                max-width: 220px;
+            }
+            
+            .click-hint {
+                bottom: -40px;
+                font-size: 0.7rem;
+                max-width: 200px;
+            }
+            
+            .paper-center {
+                padding: 10px;
+            }
+            
+            .paper-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Large Screen Styles */
+        @media (min-width: 1200px) {
+            .envelope-container {
+                max-width: 350px;
+            }
+            
+            .letter-header h2 {
+                font-size: 1.9rem;
+            }
+            
+            .letter-body {
+                font-size: 1.1rem;
+            }
+            
+            .letter-signature {
+                font-size: 1.6rem;
+            }
+            
+            .paper-center {
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-particles" id="particles"></div>
+    
+    <div class="envelope-container">
+        <div class="envelope" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="stamp"></div>
+            <div class="seal">💌</div>
+            <div class="letter" id="letter">
+                <div class="letter-content">
+                    <div class="letter-header">
+                        <h2>For You</h2>
+                        <div class="date">Hari Ini, Tanggal Bahagia</div>
+                    </div>
+                    <div class="letter-body">
+                        <p>Halo,</p>
+                        <p>....</p>
+                        <p>...</p>
+                        <p>..</p>
+                        <p>.</p>
+                        <p>.</p>
+                    </div>
+                    <div class="letter-signature">
+                        </rt>R<br>
+                        .
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="click-hint">🤍  Klik ini yaa 🤍</div>
+    </div>
+
+    <script>
+        // create partikel latar belakang
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = Math.min(30, Math.floor(window.innerWidth / 20));
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.width = (Math.random() * 3 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+
+        // create efek confetti
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf'];
+            const container = document.body;
+            const confettiCount = Math.min(100, Math.floor(window.innerWidth / 3));
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                container.appendChild(confetti);
+                
+                // Animasi confetti
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                });
+                
+                // delete confetti setelah animasi done
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        // Membuat kertas di tengah
+        function createPaperCenter() {
+            const paper = document.createElement('div');
+            paper.className = 'paper-center';
+            paper.id = 'paperCenter';
+            paper.innerHTML = `
+                <div class="paper-content">
+                    <div class="paper-header">
+                        <h2>Pesan Terbuka!</h2>
+                        <div class="date">${new Date().toLocaleDateString('id-ID', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}</div>
+                    </div>
+                    <div class="paper-body">
+                        <p>alooo kak</p>
+                        <p>kak? aku masi ada rasa sama kamu, aku masih sayang sama kamu, kak? aku pengen banget balik sama kamu, sedikit cerita kak aku gk rela pas kita putus masih ada yang ganjel di hatiku kak maaf lebay tapi emang kenyataan nya begitu tolong yaa kak jawab pesen ini apapun jawaban kk masi aku terima, mau kk nolak mau kk nerima, tpi kalo kk nerima balik sama aku aku bakal catet hari ini hari paling bahagia kak, kasi aku 1x kesempatan ya kak buat ngulagi hubungan kita, tapi kalo kk udh punya cowo baru kk gk perlu bales pesen ini lagi kk cukup blokir semua kontak aku, 1x lagi kak aku masi sayang banget sama kaka, berapa bulan gk sama kaka aku malah panik kak sering kepikiran ka.</p>
+                        <p>I Love You</p>
+                        <p>🤍</p>
+                    </div>
+                    <div class="paper-signature">
+                        Reviano<br>
+                        Y.S
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(paper);
+            
+            // kertas setelah delay kecil
+            setTimeout(() => {
+                paper.classList.add('show');
+            }, 100);
+            
+            return paper;
+        }
+
+        // membuka surat
+        function openLetter() {
+            const envelope = document.getElementById('envelope');
+            const letter = document.getElementById('letter');
+            const hint = document.querySelector('.click-hint');
+            
+            // Cek surat sudah terbuka
+            if (letter.classList.contains('open')) {
+                return;
+            }
+            
+            // class untuk animasi
+            envelope.classList.add('open');
+            letter.classList.add('open');
+            
+            // Hide hint dengan animasi
+            if (hint) {
+                hint.style.transition = 'all 0.5s ease';
+                hint.style.opacity = '0';
+                hint.style.transform = 'translateX(-50%) translateY(20px)';
+                setTimeout(() => {
+                    hint.style.display = 'none';
+                }, 500);
+            }
+            
+            // efek confetti setelah delay
+            setTimeout(createConfetti, 800);
+            
+            // efek getar pada amplop
+            envelope.style.animation = 'bounce 0.5s ease';
+            setTimeout(() => {
+                envelope.style.animation = '';
+            }, 600);
+            
+            
+            setTimeout(() => {
+                letter.classList.add('disappear');
+                // Buat dan tampilkan kertas
+                setTimeout(() => {
+                    createPaperCenter();
+                }, 1500); // Tunggu animasi
+                
+            }, 2000); // 2 detik
+        }
+
+        // Fungsi untuk menangani resize
+        function handleResize() {
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+            createParticles();
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            const envelope = document.getElementById('envelope');
+            envelope.addEventListener('click', openLetter);
+            envelope.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                openLetter();
+            }, { passive: false });
+            
+            window.addEventListener('resize', handleResize);
+            
+            // Keyboard support
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    e.preventDefault();
+                    openLetter();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
